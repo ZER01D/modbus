@@ -3,9 +3,6 @@ package org.hashmap.modbus.RtuExample.master;
 import com.digitalpetri.modbus.requests.*;
 import org.hashmap.modbus.RtuMaster.ModbusRtuMaster;
 import org.hashmap.modbus.RtuMaster.ModbusRtuMasterConfig;
-import com.digitalpetri.modbus.codec.Modbus;
-import com.digitalpetri.modbus.responses.ReadHoldingRegistersResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +26,7 @@ public class RtuMasterExample {
         /*
             Serial Port to be required.
          */
-        ModbusRtuMasterConfig config = new ModbusRtuMasterConfig.Builder("/dev/pts/45")
+        ModbusRtuMasterConfig config = new ModbusRtuMasterConfig.Builder("/dev/pts/27")
                 .build();
 
         ModbusRtuMaster master = new ModbusRtuMaster(config);
@@ -40,10 +37,45 @@ public class RtuMasterExample {
         if (!started) return;
 
         byte slaveId = 0x11;
-        master.sendRequest(new ReadHoldingRegistersRequest(107, 3), slaveId);
-//        master.sendRequest(new ReadCoilsRequest(1956, 37), slaveId);
+
+        /***********************************************************
+                READ REQUESTS
+        ************************************************************/
+        // Function Code - 01
+        master.sendRequest(new ReadCoilsRequest(19, 37), slaveId);
+
+        // Function Code - 02
 //        master.sendRequest(new ReadDiscreteInputsRequest(196, 22), slaveId);
+
+        // Function Code - 03
+//        master.sendRequest(new ReadHoldingRegistersRequest(107, 3), slaveId);
+
+        // Function Code - 04
 //        master.sendRequest(new ReadInputRegistersRequest(8, 1), slaveId);
+
+
+        /************************************************************
+                WRITE REQUESTS
+         ************************************************************/
+        // Function Code : 05
+//        master.sendRequest(new WriteSingleCoilRequest(172, true), slaveId);
+
+        //Function Code : 06
+//        master.sendRequest(new WriteSingleRegisterRequest(1, 3), slaveId);
+
+        //Function Code : 15
+//        byte[] valuesCoil = new byte[2];
+//        valuesCoil[0] = 0x0D;
+//        valuesCoil[1] = 0x01;
+//        master.sendRequest(new WriteMultipleCoilsRequest(19, 10, valuesCoil), slaveId);
+
+        //Function Code : 16
+//        byte[] valueRegister = new byte[4];
+//        valueRegister[0] = 0x00;
+//        valueRegister[1] = 0x0A;
+//        valueRegister[2] = 0x01;
+//        valueRegister[3] = 0x02;
+//        master.sendRequest(new WriteMultipleRegistersRequest(1,2,valueRegister), slaveId);
     }
 
     public void stop() {
