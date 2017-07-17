@@ -94,27 +94,24 @@ public class ModbusRtuMaster {
             CRC is being calculate according to the xls provided by Modbus.
             Link : http://www.simplymodbus.ca/crc.xls
          */
-        int crc = 0xffff;     // initial value
-        int polynomial =  0xA001;  // 1010000000000001
+        int crc = 0xffff;           // initial value
+        int polynomial =  0xA001;   // 1010000000000001
 
         for(int i=0; i < buffer.capacity() - 2; i++) {
-            crc = crc ^ buffer.getByte(i);
-            System.out.println("1. CRC : " + Integer.toHexString(crc) + "  Byte:  " + Integer.toHexString(buffer.getByte(i)));
+            crc = crc ^ ((int) buffer.getByte(i) & 0xFF);
             for(int j=0; j < 8; j++) {
                 boolean bit16 = ((crc & 1) == 1);
                 crc = crc >> 1;
                 if (bit16) {
                     crc = crc ^ polynomial;
                 }
-//                System.out.println("2. CRC111 : " + Integer.toHexString(crc));
             }
-//            System.out.println("3. CRC : " + Integer.toHexString(crc));
         }
         crc &= 0xffff;
         int b1 = crc & 0xFF;
         crc = crc >> 8;
         crc = crc | (b1 << 8);
-        System.out.println("Final CRC : " + Integer.toHexString(crc));
+//        System.out.println("Final CRC : " + Integer.toHexString(crc));
         return crc;
     }
 
@@ -164,6 +161,7 @@ public class ModbusRtuMaster {
         buffer = modbusRtuCodec.encode(modbusRtuPayload, buffer);
 
         crcCode = calculateCRC(buffer);
+        logger.debug("Calculated CRC for Payload : " + crcCode);
         modbusRtuPayload.setCrcCode(crcCode);
         buffer.writeShort(crcCode);
 
