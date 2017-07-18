@@ -18,17 +18,21 @@ class SerialManager {
     private final int SIZE_DATACOUNT = 2;
     private final int SIZE_NODATABYTE = 1;
     private final int SIZE_CRCCODE = 2;
+    private final int READ_OUTPUT_COILS = 1;
+    private final int READ_INPUT_CONTACTS = 2;
+    private final int READ_HOLDING_REGISTER = 3;
+    private final int READ_INPUT_REGISTER = 4;
 
 
     SerialManager() {}
 
-    public int getSIZE_INITBUFFER() { return SIZE_INITBUFFER; };
-    public int getSIZE_SLAVEID() { return SIZE_SLAVEID; };
-    public int getSIZE_FUNCODE() { return SIZE_FUNCODE; };
-    public int getSIZE_FIRSTADDRESS() { return SIZE_FIRSTADDRESS; };
-    public int getSIZE_DATACOUNT() { return SIZE_DATACOUNT; };
-    public int getSIZE_NODATABYTE() { return SIZE_NODATABYTE; };
-    public int getSIZE_CRCCODE() {return SIZE_CRCCODE; };
+    public int getSIZE_INITBUFFER() { return SIZE_INITBUFFER; }
+    public int getSIZE_SLAVEID() { return SIZE_SLAVEID; }
+    public int getSIZE_FUNCODE() { return SIZE_FUNCODE; }
+    public int getSIZE_FIRSTADDRESS() { return SIZE_FIRSTADDRESS; }
+    public int getSIZE_DATACOUNT() { return SIZE_DATACOUNT; }
+    public int getSIZE_NODATABYTE() { return SIZE_NODATABYTE; }
+    public int getSIZE_CRCCODE() {return SIZE_CRCCODE; }
 
     CommPortIdentifier getCommPortIdentifier(String portName) {
         try {
@@ -101,21 +105,30 @@ class SerialManager {
         });
     }
 
-    ByteBuf readResponseOnSerialPort(InputStream inputStream) {
+    ByteBuf readResponseOnSerialPort(InputStream inputStream, ModbusRtuMasterConfig config) {
         int size = 0;
         ByteBuf buffer = null;
         try {
             int slaveId = inputStream.read();
             int fcCode = inputStream.read();
+            logger.debug("SlaveId of the Response : " + slaveId + " with Function Code : " + fcCode);
 
-            if (fcCode == 1 || fcCode == 2 || fcCode == 3 || fcCode == 4) {
+            if (fcCode == READ_OUTPUT_COILS || fcCode == READ_INPUT_CONTACTS ||
+                fcCode == READ_HOLDING_REGISTER || fcCode == READ_INPUT_REGISTER) {
 
                 int noDataByte = inputStream.read();
+                logger.debug("No. of Bytes to follow : " + noDataByte);
                 int[] receivedValues = new int[noDataByte + 1];
                 receivedValues[0] = noDataByte;
                 for (int i = 1; i < receivedValues.length; i++) {
                     receivedValues[i] = inputStream.read();
                 }
+
+                if (config.isLsbWordFirst() &&
+                    (fcCode == READ_HOLDING_REGISTER || fcCode == READ_INPUT_REGISTER)) {
+                    parseWordOrderedArray(receivedValues, noDataByte);
+                }
+
                 int[] crcCode = new int[SIZE_CRCCODE];
                 for (int i = 0; i < SIZE_CRCCODE; i++) {
                     crcCode[i] = inputStream.read();
@@ -156,5 +169,26 @@ class SerialManager {
         buffer.writeByte(crcCode[0]);
         buffer.writeByte(crcCode[1]);
         return buffer;
+    }
+
+    private void parseWordOrderedArray(int[] receivedValues, int noDataByte) {
+        int noOf32BitsData = noDataByte / 4;
+        for ( int i = 3; i <= noOf32BitsData * 4; i++) {
+            int temp = receivedValues[i];
+            receivedValues[i] = receivedValues[i-2];
+            receivedValues[i-2] = temp;
+            if ( (i % 4) == 0) {
+                i += 2;
+            }
+        }
+    }
+
+    private void parseByteOrderedArray(int[] receivedValues, int noDataByte) {
+        int noOf16BitsData = noDataByte / 2;
+        for ( int i = 2; i <= noOf16BitsData * 2; i += 2) {
+            int temp = receivedValues[i];
+            receivedValues[i] = receivedValues[i-1];
+            receivedValues[i-1] = temp;
+        }
     }
 }

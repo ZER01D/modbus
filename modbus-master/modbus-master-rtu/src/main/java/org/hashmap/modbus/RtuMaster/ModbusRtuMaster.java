@@ -59,7 +59,7 @@ public class ModbusRtuMaster {
             return;
         }
 
-        ByteBuf buf = serialManager.readResponseOnSerialPort(inputStream);
+        ByteBuf buf = serialManager.readResponseOnSerialPort(inputStream, config);
         if (buf ==null) {
             logger.error("Error in reading data on Serial Port");
             return;
@@ -166,6 +166,10 @@ public class ModbusRtuMaster {
         buffer.writeShort(crcCode);
 
         printBufferMsg(buffer);
+        return convertBufferToByteArray(buffer);
+    }
+
+    private byte[] convertBufferToByteArray(ByteBuf buffer) {
         byte[] byteMsg = new byte[buffer.capacity()];
         for(int i=0; i < buffer.capacity(); i++) {
             byteMsg[i] = buffer.getByte(i);

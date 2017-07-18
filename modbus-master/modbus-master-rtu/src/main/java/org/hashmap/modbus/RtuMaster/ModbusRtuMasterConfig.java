@@ -10,7 +10,7 @@ public class ModbusRtuMasterConfig {
     private final int stopBits;
     private final int parity;
     private final int flowControl;
-
+    private final boolean lsbWordFirst;
 
     public ModbusRtuMasterConfig(String portName,
                                  int baudRate,
@@ -18,7 +18,8 @@ public class ModbusRtuMasterConfig {
                                  int dataBits,
                                  int stopBits,
                                  int parity,
-                                 int flowControl) {
+                                 int flowControl,
+                                 boolean lsbWordFirst) {
         this.portName = portName;
         this.baudRate = baudRate;
         this.timeout = timeout;
@@ -26,7 +27,7 @@ public class ModbusRtuMasterConfig {
         this.stopBits = stopBits;
         this.parity = parity;
         this.flowControl = flowControl;
-
+        this.lsbWordFirst = lsbWordFirst;
     }
 
     public String getPortName() {
@@ -53,6 +54,7 @@ public class ModbusRtuMasterConfig {
 
     public int getParity() { return  parity; }
 
+    public boolean isLsbWordFirst() { return lsbWordFirst; }
 
     public static class Builder {
 
@@ -63,6 +65,7 @@ public class ModbusRtuMasterConfig {
         private int stopBits = SerialPort.STOPBITS_1;
         private int parity = SerialPort.PARITY_NONE;
         private int flowControl = SerialPort.FLOWCONTROL_NONE;
+        private boolean lsbWordFirst = false;
 
         public Builder(String portName) {
             this.portName = portName;
@@ -95,8 +98,14 @@ public class ModbusRtuMasterConfig {
 
         public Builder setFlowControl(int flowControl) {
             this.flowControl = flowControl;
-                    return this;
+            return this;
         }
+
+        public Builder setLsbWordFirst(boolean lsbWordFirst) {
+            this.lsbWordFirst = lsbWordFirst;
+            return this;
+        }
+
 
         public ModbusRtuMasterConfig build() {
             return new ModbusRtuMasterConfig(
@@ -106,7 +115,8 @@ public class ModbusRtuMasterConfig {
                     dataBits,
                     stopBits,
                     parity,
-                    flowControl);
+                    flowControl,
+                    lsbWordFirst);
         }
     }
 }
