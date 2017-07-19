@@ -38,13 +38,13 @@ public class ModbusRtuMaster {
     }
 
     public void sendRequest(ModbusRequest request, byte slaveId) {
-        SerialPort serialPort = initSerialComm();
+        SerialPort serialPort = serialManager.initSerialComm(config);
         if (serialPort == null) {
             logger.error("Error in initializing serial port.");
             return;
         }
 
-        byte[]byteMsg = createMsgPayload(slaveId, request);
+        byte[] byteMsg = createMsgPayload(slaveId, request);
 
         outputStream = serialManager.getSerialPortOutputStream(serialPort);
         if (outputStream == null) {
@@ -70,26 +70,7 @@ public class ModbusRtuMaster {
         serialPort.close();
     }
 
-    private SerialPort initSerialComm() {
-        CommPortIdentifier portId = serialManager.getCommPortIdentifier(config.getPortName());
-        if (portId == null) {
-            logger.error("Error in getting Port Identifier for PostName : " + config.getPortName());
-            return null;
-        }
-
-        serialManager.addOwnerShipOfPort(portId);
-        SerialPort serialPort = serialManager.openSerialPort(portId, config.getTimeout());
-        if (serialPort == null) {
-            logger.error("Error in Opening Serial Port. Request Timeout");
-            return null;
-        }
-
-        serialManager.setFlowControlMode(serialPort, config.getFlowControl());
-        serialManager.setSerialPortParams(serialPort, config);
-        return serialPort;
-    }
-
-    private static int calculateCRC(ByteBuf buffer) {
+    public static int calculateCRC(ByteBuf buffer) {
         /*
             CRC is being calculate according to the xls provided by Modbus.
             Link : http://www.simplymodbus.ca/crc.xls
@@ -124,7 +105,7 @@ public class ModbusRtuMaster {
         System.out.println("HEX String : " + sb.toString().replaceAll("\\s+",""));
     }
 
-    private byte[] createMsgPayload(byte slaveId, ModbusRequest request) {
+    public byte[] createMsgPayload(byte slaveId, ModbusRequest request) {
         int crcCode;
         modbusRtuPayload = new ModbusRtuPayload(slaveId, request);
 
@@ -166,19 +147,10 @@ public class ModbusRtuMaster {
         buffer.writeShort(crcCode);
 
         printBufferMsg(buffer);
-        return convertBufferToByteArray(buffer);
+        return serialManager.convertBufferToByteArray(buffer);
     }
 
-    private byte[] convertBufferToByteArray(ByteBuf buffer) {
-        byte[] byteMsg = new byte[buffer.capacity()];
-        for(int i=0; i < buffer.capacity(); i++) {
-            byteMsg[i] = buffer.getByte(i);
-//            System.out.println("byte : " + byteMsg[i]);
-        }
-        return byteMsg;
-    }
-
-    private void decodeReceivedBuffer(byte slaveId, ByteBuf buf) {
+    public void decodeReceivedBuffer(byte slaveId, ByteBuf buf) {
         try {
             modbusRtuCodec.decode(slaveId, buf);
         } catch (Exception ex) {

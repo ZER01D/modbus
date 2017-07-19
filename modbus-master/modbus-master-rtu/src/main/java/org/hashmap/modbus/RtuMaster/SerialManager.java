@@ -34,6 +34,25 @@ class SerialManager {
     public int getSIZE_NODATABYTE() { return SIZE_NODATABYTE; }
     public int getSIZE_CRCCODE() {return SIZE_CRCCODE; }
 
+    SerialPort initSerialComm(ModbusRtuMasterConfig config) {
+        CommPortIdentifier portId = getCommPortIdentifier(config.getPortName());
+        if (portId == null) {
+            logger.error("Error in getting Port Identifier for PostName : " + config.getPortName());
+            return null;
+        }
+
+        addOwnerShipOfPort(portId);
+        SerialPort serialPort = openSerialPort(portId, config.getTimeout());
+        if (serialPort == null) {
+            logger.error("Error in Opening Serial Port. Request Timeout");
+            return null;
+        }
+
+        setFlowControlMode(serialPort, config.getFlowControl());
+        setSerialPortParams(serialPort, config);
+        return serialPort;
+    }
+
     CommPortIdentifier getCommPortIdentifier(String portName) {
         try {
             return CommPortIdentifier.getPortIdentifier(portName);
@@ -159,7 +178,7 @@ class SerialManager {
         return  null;
     }
 
-    private ByteBuf createByteBuffer(int slaveId, int fcCode, int[] receivedValues, int[] crcCode, int size) {
+    ByteBuf createByteBuffer(int slaveId, int fcCode, int[] receivedValues, int[] crcCode, int size) {
         ByteBuf buffer = buffer(size);
         buffer.writeByte(slaveId);
         buffer.writeByte(fcCode);
@@ -169,6 +188,15 @@ class SerialManager {
         buffer.writeByte(crcCode[0]);
         buffer.writeByte(crcCode[1]);
         return buffer;
+    }
+
+    byte[] convertBufferToByteArray(ByteBuf buffer) {
+        byte[] byteMsg = new byte[buffer.capacity()];
+        for(int i=0; i < buffer.capacity(); i++) {
+            byteMsg[i] = buffer.getByte(i);
+//            System.out.println("byte : " + byteMsg[i]);
+        }
+        return byteMsg;
     }
 
     private void parseWordOrderedArray(int[] receivedValues, int noDataByte) {
