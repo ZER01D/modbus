@@ -58,6 +58,7 @@
         <module>modbus-slave-tcp</module>
         <module>modbus-master-rtu</module>
         <module>modbus-rtu-example</module>
+        <module>final-module</module>
     </modules>
 
     <properties>
