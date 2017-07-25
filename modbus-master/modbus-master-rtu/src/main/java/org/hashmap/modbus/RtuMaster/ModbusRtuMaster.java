@@ -37,11 +37,11 @@ public class ModbusRtuMaster {
         return config;
     }
 
-    public void sendRequest(ModbusRequest request, byte slaveId) {
+    public ByteBuf sendRequest(ModbusRequest request, byte slaveId) {
         SerialPort serialPort = serialManager.initSerialComm(config);
         if (serialPort == null) {
             logger.error("Error in initializing serial port.");
-            return;
+            return null;
         }
 
         byte[] byteMsg = createMsgPayload(slaveId, request);
@@ -49,25 +49,29 @@ public class ModbusRtuMaster {
         outputStream = serialManager.getSerialPortOutputStream(serialPort);
         if (outputStream == null) {
             logger.error("Error in initializing Output Stream for writing data on Serial Port");
-            return;
+            return null;
         }
 
         serialManager.sendRequestOutStream(outputStream, byteMsg);
         inputStream = serialManager.getSerialPortInputStream(serialPort);
         if (inputStream == null) {
             logger.error("Error in initializing Input Stream for reading data on Serial Port");
-            return;
+            return null;
         }
 
         ByteBuf buf = serialManager.readResponseOnSerialPort(inputStream, config);
-        if (buf ==null) {
+        if (buf == null) {
             logger.error("Error in reading data on Serial Port");
-            return;
+            return null;
         }
 
-        decodeReceivedBuffer(slaveId, buf);
-        printBufferMsg(buf);
+        if (!decodeReceivedBuffer(slaveId, buf)) {
+            logger.error("Error in decoding the received buffer.");
+            return null;
+        }
+        buf = readRegisterValuesFromBuffer(buf);
         serialPort.close();
+        return buf;
     }
 
     public static int calculateCRC(ByteBuf buffer) {
@@ -146,15 +150,25 @@ public class ModbusRtuMaster {
         modbusRtuPayload.setCrcCode(crcCode);
         buffer.writeShort(crcCode);
 
-        printBufferMsg(buffer);
         return serialManager.convertBufferToByteArray(buffer);
     }
 
-    public void decodeReceivedBuffer(byte slaveId, ByteBuf buf) {
+    public boolean decodeReceivedBuffer(byte slaveId, ByteBuf buf) {
         try {
             modbusRtuCodec.decode(slaveId, buf);
+            return true;
         } catch (Exception ex) {
             logger.error("Error in decoding the Buffer Received");
         }
+        return false;
+    }
+
+    public ByteBuf readRegisterValuesFromBuffer(ByteBuf buffer) {
+        ByteBuf regBuf = buffer(buffer.capacity() - 5);
+        for (int i = 3; i < buffer.capacity() - 2; i++) {
+            regBuf.writeByte(buffer.getByte(i));
+            logger.debug("Register Bytes : " + buffer.getByte(i));
+        }
+        return regBuf;
     }
 }

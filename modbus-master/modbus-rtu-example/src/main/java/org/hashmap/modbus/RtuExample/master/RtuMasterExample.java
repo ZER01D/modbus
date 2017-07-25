@@ -1,6 +1,7 @@
 package org.hashmap.modbus.RtuExample.master;
 
 import com.digitalpetri.modbus.requests.*;
+import io.netty.buffer.ByteBuf;
 import org.hashmap.modbus.RtuMaster.ModbusRtuMaster;
 import org.hashmap.modbus.RtuMaster.ModbusRtuMasterConfig;
 import org.slf4j.Logger;
@@ -42,16 +43,16 @@ public class RtuMasterExample {
                 READ REQUESTS
         ************************************************************/
         // Function Code - 01
-        master.sendRequest(new ReadCoilsRequest(19, 37), slaveId);
+        ByteBuf buf = master.sendRequest(new ReadCoilsRequest(19, 37), slaveId);
 
         // Function Code - 02
-//        master.sendRequest(new ReadDiscreteInputsRequest(196, 22), slaveId);
+//        ByteBuf buf = master.sendRequest(new ReadDiscreteInputsRequest(196, 22), slaveId);
 
         // Function Code - 03
-//        master.sendRequest(new ReadHoldingRegistersRequest(107, 3), slaveId);
+//        ByteBuf buf = master.sendRequest(new ReadHoldingRegistersRequest(107, 3), slaveId);
 
         // Function Code - 04
-//        master.sendRequest(new ReadInputRegistersRequest(8, 1), slaveId);
+//        ByteBuf buf = master.sendRequest(new ReadInputRegistersRequest(8, 1), slaveId);
 
 
         /************************************************************
