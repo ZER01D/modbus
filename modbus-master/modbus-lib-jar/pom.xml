@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>org.hashmap.modbus</groupId>
-    <artifactId>final-module</artifactId>
+    <artifactId>modbus-lib-jar</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <dependencies>

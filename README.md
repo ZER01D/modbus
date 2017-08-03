@@ -106,6 +106,6 @@ Create a Virtual Serial Port.
 
     Now, move to modbus-master project and run the file ```MasterSlaveRtuThroughput.java```.
 
-NOTE : Make sure that you are using in these project are not in listening mode on terminal.
+NOTE : Make sure that the Serial Port you are using in these project are not in listening mode on terminal.
        Otherwise the written messages will be directed to the terminal.
 
