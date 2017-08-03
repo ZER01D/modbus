@@ -15,7 +15,7 @@ Library can be used as Modbus master to request data from modbus slaves.
 Complete code for modbus library, which contains api's for rtu and tcp for modbus-master. Module also contain example for both rtu and tcp based master.
 
 ### Modbus Master Sub-Modules
-- [final-module](#final-module)
+- [modbus-lib-jar](#modbus-lib-jar)
 - [modbus-codec](#modbus-codec)
 - [modbus-core](#modbus-core)
 - [modbus-example](#modbus-example)
@@ -24,8 +24,8 @@ Complete code for modbus library, which contains api's for rtu and tcp for modbu
 - [modbus-rtu-example](#modbus-rtu-example)
 - [modbus-slave-tcp](#modbus-slave-tcp)
 
-#### final-module
-On building the project final-module will contain the compiled Jar with all the supported modules and dependencies. To use modbus library in some project import the jar generated in this project.
+#### modbus-lib-jar
+On building the project modbus-lib-jar will contain the compiled Jar with all the supported modules and dependencies. To use modbus library in some project import the jar generated in this project.
 
 #### modbus-codec
 Module is having the Encoder, Decoder and Payload formats for RTU and TCP request and response.
