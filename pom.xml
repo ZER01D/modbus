@@ -24,14 +24,22 @@
     <packaging>pom</packaging>
 
     <name>Modbus</name>
-    <description>High-performance, non-blocking, zero-buffer-copying Modbus for Java</description>
-    <url>https://github.com/digitalpetri/modbus</url>
+    <description>High-performance, non-blocking, zero-buffer-copying Modbus TCP and RTU for Java</description>
+    <url>https://github.com/hashmapinc/modbus</url>
 
     <developers>
         <developer>
             <id>kevinherron</id>
             <name>Kevin Herron</name>
             <email>kevinherron@gmail.com</email>
+        </developer>
+        <developer>
+            <id>shubhamgupta</id>
+            <name>Shubham Gupta</name>
+        </developer>
+        <developer>
+            <id>cherrera2001</id>
+            <name>Chris Herrera</name>
         </developer>
     </developers>
 
@@ -44,9 +52,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/digitalpetri/modbus</url>
-        <connection>scm:git:git://github.com/digitalpetri/modbus.git</connection>
-        <developerConnection>scm:git:git@github.com:digitalpetri/modbus.git</developerConnection>
+        <url>https://github.com/hashmapinc/modbus.git</url>
+        <connection>scm:git:git://github.com/hashmapinc/modbus.git</connection>
+        <developerConnection>scm:git:git@github.com:hashmapinc/modbus.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -55,6 +63,8 @@
         <module>modbus-core</module>
         <module>modbus-examples</module>
         <module>modbus-master-tcp</module>
+        <module>modbus-master-rtu</module>
+        <module>modbus-rtu-example</module>
         <module>modbus-slave-tcp</module>
     </modules>
 
